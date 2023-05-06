@@ -1,0 +1,51 @@
+# Contributing
+
+For any contribution, please create the proposed changes in a forked repo, and open a Pull Request against the main branch.
+
+## Changes to existing checklists
+
+There are two ways in which you can send changes to the existing checklists:
+
+### Option 1: Modifying the JSON file directly
+
+Modify the relevant `.en.json` file in the `checklists` directory, either in the Github portal or in your own clone with your favorite text editor, and send a Pull Request to the main branch. Each checklist (LZ, AKS, AVD) has a predefined set of owners that will review the individual PRs (see [CODEOWNERS](./CODEOWNERS)).
+
+> **Warning**
+> Do not modify the non-English versions of the checklists, since they are dynamically generated
+
+If you are adding new rules, make sure to include unique GUIDs for each. You can use your favorite GUID generation tool to generate new random GUIDs, such as [https://guidgenerator.com/](https://guidgenerator.com/)
+
+### Option 2: Using the spreadsheet to create new JSON files
+
+Optionally, you can use the provided Excel spreadsheet to do changes to the existing checklists:
+
+1. Open the [Excel spreadsheet](./spreadsheet/review_checklist.xlsm), and load the English version of any of the supported checklist
+1. Do any change you want. Some remarks:
+    - If adding or changing hyperlinks, it is OK putting the raw URL in the corresponding cell. The export mechanism will take care of removing the localization
+    - If adding new rules, you can leave the GUID field empty, the export mechanism will generate a new random GUID
+1. Export the checklist to a JSON file (using the button "Export checklist to JSON"), which you can check into the Github repository (refer to [Option 1: Modifying the JSON file directly](#option-1-modifying-the-jSON-file-directly))
+
+## Adding Resource Graph queries
+
+When adding Azure Resource Graph queries, the query is expected to return two fields:
+
+* `id`: ARM ID of the resource being evaluated
+* `compliant`: boolean value that indicates whether the resource is compliant or non-compliant with the recommendation
+
+For example, take the recommendation in the AKS checklist "Use Availability Zones if supported in your Azure region". The following query creates the `compliant` column based on a boolean check, and returns both the `id` and the new `compliant` columns:
+
+```
+where type=='microsoft.containerservice/managedclusters' | extend compliant= isnotnull(zones) | distinct id,compliant
+```
+
+## Changes to the spreadsheet
+
+Modify the file [spreadsheet/review_checklist.xlsm](./spreadsheet/review_checklist.xlsm) in your own fork, and send a Pull Request to the main branch. Make sure not to check in temporary files (by closing the Excel spreadsheet before git-adding the files).
+
+## Forking the repo
+
+If you fork this repository you will need to create an Azure Translator in Azure, and define three secrets in your repo so that automatic translation works:
+
+- `AZURE_TRANSLATOR_ENDPOINT`: containing the endpoint URL for your Azure Translator. You will find this in the Azure Portal, in the blade "Keys and Endpoint" of your Azure Translator, under "Text Translation".
+- `AZURE_TRANSLATOR_REGION` (optional): containing the region for your Azure Translator. You will find this in the Azure Portal, in the blade "Keys and Endpoint" of your Azure Translator, under "Location/Region".
+- `AZURE_TRANSLATOR_SUBSCRIPTION_KEY`: the subscription key for your Azure Translator. You will find this in the Azure Portal, in the blade "Keys and Endpoint" of your Azure Translator, under "Key 1" or "Key 2" (you can use either of them).
